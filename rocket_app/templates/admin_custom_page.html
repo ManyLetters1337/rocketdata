@@ -1,0 +1,48 @@
+{% extends 'admin/base_site.html' %}
+
+{% block title %}Тестовая страница в админке | Мой проект{% endblock %}
+
+{% comment %}{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" href="{{ STATIC_URL }}path/css/style.css">
+{% endblock %}{% endcomment %}
+
+{% block content %}
+    <div class="fieldsets">
+        <table>
+            <td>Type</td>
+            <td>Title</td>
+            <td>Debt</td>
+            <td>Contact</td>
+            <td>Address</td>
+            <td>Employees</td>
+            <td>Provider</td>
+            {% for object in data %}
+            <tr>
+                <td> {{ object.type }}</td>
+                <td><a href="{% url 'element_page' object.id %}">{{ object.title }}</a></td>
+                <td> {{ object.debt }}</td>
+                {% for contact in object.contact_set.all  %}
+                <td> {{ contact }} </td>
+                    {% for address in contact.address_set.all %}
+                <td> {{ address.country }}, {{ address.city }}, {{ address.street }}, {{ address.house_number }}</td>
+                    {% endfor %}
+                {% endfor %}
+                <td>
+                    {% for employee in object.employees.all %}
+                        {% if employee.user.first_name and employee.user.last_name %}
+                        <p> {{ employee.user.first_name }} {{ employee.user.last_name }} </p>
+                        {% else %}
+                        <p> {{ employee.user }} </p>
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                {% if object.parent %}
+                    <td> {{ object.parent }}</td>
+                {% else %}
+                    <td> - </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'admin/base_site.html' %}
+
+{% block title %}Тестовая страница в админке | Мой проект{% endblock %}
+
+{% comment %}{% block extrastyle %}{{ block.super }}
+    <link rel="stylesheet" href="{{ STATIC_URL }}path/css/style.css">
+{% endblock %}{% endcomment %}
+
+{% block content %}
+    <div class="fieldsets">
+            <h2>Type</h2>
+            <h3>{{ object.type }}</h3>
+            <h2>Title</h2>
+            <h3>{{ object.title }}</h3>
+            <h2>Debt</h2>
+            <h3>{{ object.debt }}</h3>
+            <h2>Creation time</h2>
+            <h3>{{ object.creation_time }}</h3>
+            <h2>Employees</h2>
+            {% for employee in object.employees.all %}
+            {% if employee.user.first_name and employee.user.last_name %}
+            <h4> {{ employee.user.first_name }} {{ employee.user.last_name }} </h4>
+            {% else %}
+            <h4> {{ employee.user }} </h4>
+            {% endif %}
+            {% endfor %}
+            <h2>Provider</h2>
+            {% if object.parent.id %}
+                <h3><a href="{% url 'element_page' object.parent.id %}"> {{ object.parent.title }}</a></h3>
+            {% else %}
+                <h3>-</h3>
+            {% endif %}
+        <hr style="margin-top: 10px; margin-bottom: 10px">
+        {% if childrens %}
+        <form method="GET" action="{% url 'element_page' object.id %}">
+            {{ form.as_p }}
+            <input type="submit" value="Filter">
+        </form>
+        <hr style="margin-top: 10px; margin-bottom: 10px">
+        <form method="POST" action="{% url 'element_page' object.id %}">
+            {% csrf_token %}
+        <table>
+                <td>#</td>
+                <td>Type</td>
+                <td>Title</td>
+                <td>Debt</td>
+                <td>Contact</td>
+                <td>Address</td>
+                <td>Employees</td>
+                <td>Provider</td>
+                {% for children in childrens %}
+                <tr>
+                    <td><input type="checkbox" name="childrens" value="{{ children.id }}" /></td>
+                    <td> {{ children.type }}</td>
+                    <td> {{ children.title }}</td>
+                    <td> {{ children.debt }}</td>
+                    <td> {% for contact in children.contact_set.all  %}
+                        {{ contact }}
+                        {% for address in contact.address_set.all %}
+                    <td> {{ address.country }}, {{ address.city }}, {{ address.street }}, {{ address.house_number }}</td>
+                        {% endfor %}
+                    {% endfor %}
+                    </td>
+                    <td> {% for employee in children.employees.all  %}
+                        {{ employee.user.first_name }}
+                    {% endfor %}
+                    </td>
+                    {% if children.parent %}
+                    <td><a href="{% url 'element_page' children.parent.id %}"> {{ children.parent }} </a></td>
+                    {% else %}
+                        <td> - </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </table>
+            <input type="submit" value="Clear">
+        </form>
+        {% endif %}
+    </div>
+{% endblock %}
